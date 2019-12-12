@@ -1,17 +1,16 @@
-#import cassandra
+# import cassandra
 import os
 import glob
 import csv
 
 
-def write_csv_from_list(data_list):
+def write_csv_from_list(data_list, header_row, filename):
     csv.register_dialect(
         'myDialect', quoting=csv.QUOTE_ALL, skipinitialspace=True)
 
-    with open('event_datafile_new.csv', 'w', encoding='utf8', newline='') as f:
+    with open(filename, 'w', encoding='utf8', newline='') as f:
         writer = csv.writer(f, dialect='myDialect')
-        writer.writerow(['artist', 'firstName', 'gender', 'itemInSession', 'lastName', 'length',
-                         'level', 'location', 'sessionId', 'song', 'userId'])
+        writer.writerow(header_row)
         for row in data_list:
             if (row[0] == ''):
                 continue
@@ -37,13 +36,19 @@ def get_csv_files(filepath):
         except Exception as e:
             print(e)
 
+    return full_data_rows_list
+
 
 def main():
 
     for root, dirs, files in os.walk('../input/event_data'):
         file_path_list = glob.glob(os.path.join(root, '*'))
 
-    print(file_path_list[0])
+    data_rows_list = get_csv_files(file_path_list)
+    header_row_list = ['artist', 'firstName', 'gender', 'itemInSession', 'lastName', 'length',
+                       'level', 'location', 'sessionId', 'song', 'userId']
+    write_csv_from_list(data_rows_list, header_row_list,
+                        'event_datafile_new.csv')
 
 
 if __name__ == "__main__":
