@@ -1,54 +1,47 @@
-# import cassandra
+from cassandra.cluster import Cluster
 import os
 import glob
-import csv
+from utils import get_csv_files, write_csv_from_list
 
 
-def write_csv_from_list(data_list, header_row, filename):
-    csv.register_dialect(
-        'myDialect', quoting=csv.QUOTE_ALL, skipinitialspace=True)
+def init_db_conn():
+    try:
+        cluster = Cluster(["127.0.0.1"])
+        session = cluster.connect()
+    except Exception as e:
+        print("Error: Couldn't connect to cluster")
+        print(e)
 
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        writer = csv.writer(f, dialect='myDialect')
-        writer.writerow(header_row)
-        for row in data_list:
-            if (row[0] == ''):
-                continue
-            try:
-                writer.writerow((row[0], row[2], row[3], row[4], row[5],
-                                 row[6], row[7], row[8], row[12], row[13], row[16]))
-            except Exception as e:
-                print(e)
+    return session, cluster
 
 
-def get_csv_files(filepath):
-    full_data_rows_list = []
-
-    for f in filepath:
-        try:
-            with open(f, 'r', encoding='utf8', newline='') as csvfile:
-                # creating a csv reader object
-                csvreader = csv.reader(csvfile)
-                next(csvreader)
-
-                for line in csvreader:
-                    full_data_rows_list.append(line)
-        except Exception as e:
-            print(e)
-
-    return full_data_rows_list
+def create_keyspace(session, keyspace_name, keyspace_config):
+    try:
+        session.execute("""CREATE KEYSPACE IF NOT EXISTS {} 
+            WITH REPLICATION = {}
+        """.format(keyspace_name, keyspace_config))
+    except Exception as e:
+        print("Error: Couldn't create keyspace")
+        print(e)
 
 
 def main():
 
+    # Input/Ouput
+    # get files list path
     for root, dirs, files in os.walk('../input/event_data'):
         file_path_list = glob.glob(os.path.join(root, '*'))
 
+    # Get csv files
     data_rows_list = get_csv_files(file_path_list)
     header_row_list = ['artist', 'firstName', 'gender', 'itemInSession', 'lastName', 'length',
                        'level', 'location', 'sessionId', 'song', 'userId']
+    # combine all csv files into a single file
     write_csv_from_list(data_rows_list, header_row_list,
                         'event_datafile_new.csv')
+
+    # DB connection
+    session, cluster = init_db_conn()
 
 
 if __name__ == "__main__":
