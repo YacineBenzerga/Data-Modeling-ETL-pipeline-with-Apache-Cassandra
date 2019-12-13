@@ -1,34 +1,15 @@
-from cassandra.cluster import Cluster
 import os
 import glob
-from utils import get_csv_files, write_csv_from_list
-
-
-def init_db_conn():
-    try:
-        cluster = Cluster(["127.0.0.1"])
-        session = cluster.connect()
-    except Exception as e:
-        print("Error: Couldn't connect to cluster")
-        print(e)
-
-    return session, cluster
-
-
-def create_keyspace(session, keyspace_name, keyspace_config):
-    try:
-        session.execute("""CREATE KEYSPACE IF NOT EXISTS {} 
-            WITH REPLICATION = {}
-        """.format(keyspace_name, keyspace_config))
-    except Exception as e:
-        print("Error: Couldn't create keyspace")
-        print(e)
+from utils import *
+from queries import *
+from cassandra.cluster import Cluster
 
 
 def main():
 
     # Input/Ouput
     # get files list path
+    file_path_list = []
     for root, dirs, files in os.walk('../input/event_data'):
         file_path_list = glob.glob(os.path.join(root, '*'))
 
@@ -41,7 +22,15 @@ def main():
                         'event_datafile_new.csv')
 
     # DB connection
-    session, cluster = init_db_conn()
+    try:
+        cluster = Cluster(["127.0.0.1"])
+        session = cluster.connect()
+    except Exception as e:
+        print("Error: Couldn't connect to cluster")
+        print(e)
+
+    keyspace_config = {'class': 'SimpleStrategy', 'replication_factor': 1}
+    create_keyspace(session, 'spokifydb', keyspace_config)
 
 
 if __name__ == "__main__":
