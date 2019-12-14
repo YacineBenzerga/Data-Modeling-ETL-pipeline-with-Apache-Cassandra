@@ -32,6 +32,9 @@ def main():
     keyspace_config = {'class': 'SimpleStrategy', 'replication_factor': 1}
     create_keyspace(session, 'spokifydb', keyspace_config)
 
+    # Create tables:
+    exec_queries(session, create_table_queries)
+
 
 if __name__ == "__main__":
     main()

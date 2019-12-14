@@ -11,6 +11,9 @@ create_artist_user_lib += "(itemInSession int, artist text, song text, firstName
 create_user_song_lib = "CREATE TABLE IF NOT EXISTS user_per_song "
 create_user_song_lib += "(firstName text, lastName text, song text, PRIMARY KEY(song))"
 
+create_table_queries = [create_song_lib,
+                        create_artist_user_lib, create_user_song_lib]
+
 
 # Insert queries
 insert_song_lib = "INSERT INTO song_library (sessionId,itemInSession,artist,song,length)"
@@ -21,3 +24,6 @@ insert_artist_user_lib += "VALUES (%s,%s,%s,%s,%s,%s,%s)"
 
 insert_user_song_lib = "INSERT INTO user_per_song (firstName,lastName,song)"
 insert_user_song_lib += "VALUES (%s,%s,%s)"
+
+insert_table_queries = [insert_artist_user_lib,
+                        insert_song_lib, insert_user_song_lib]

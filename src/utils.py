@@ -55,3 +55,13 @@ def insert_rows_from_csv(session, query, cols):
         next(csvreader)  # skip header
         for line in csvreader:
             session.execute(query, cols)
+
+
+def exec_queries(session, queries):
+    for q in queries:
+        try:
+            session.execute(q)
+            print("Successfuly executed query: \n{}".format(q))
+        except Exception as e:
+            print("Error: Couldn't execute query:\n{}".format(q))
+            print(e)
