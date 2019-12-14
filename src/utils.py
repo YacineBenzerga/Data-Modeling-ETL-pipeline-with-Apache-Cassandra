@@ -23,8 +23,6 @@ def get_csv_files(filepath):
 
 
 def write_csv_from_list(data_list, header_row, filename):
-    print('-----------------------------')
-    print(len(data_list))
     csv.register_dialect(
         'myDialect', quoting=csv.QUOTE_ALL, skipinitialspace=True)
 

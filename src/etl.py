@@ -9,6 +9,7 @@ import pandas as pd
 def main():
 
     # DB connection
+    print('Initialize cluster connection')
     try:
         cluster = Cluster(["127.0.0.1"])
         session = cluster.connect()
@@ -18,8 +19,10 @@ def main():
 
     keyspace_config = {'class': 'SimpleStrategy', 'replication_factor': 1}
     create_keyspace(session, 'spokifydb', keyspace_config)
+    print('-----------------------------')
 
     # Input/Output
+    print('Input/Output')
     input_files_path = os.path.abspath(
         os.path.join(os.getcwd()) + '/input/event_data')
     file_path_list = []
@@ -35,13 +38,27 @@ def main():
                         'event_datafile_new.csv')
 
     df = pd.read_csv('event_datafile_new.csv')
+    print('-----------------------------')
 
+    print('Create&Insert data into Tables')
     # Create tables:
     exec_queries(session, create_table_queries)
 
     # Insert rows:
     for q in insert_table_queries:
         insert_rows_from_df(session, df, q[0], q[1])
+    print('-----------------------------')
+
+    # Drop tables:
+    #tables = ['user_per_song', 'artist_user_library', 'song_library']
+    # for t in tables:
+    #    session.execute("DROP TABLE {}".format(t))
+
+    # Close session and cluster connection
+    print('Closing session and cluster connection')
+    session.shutdown()
+    cluster.shutdown()
+    print('-----------------------------')
 
 
 if __name__ == "__main__":
